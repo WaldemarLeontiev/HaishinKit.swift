@@ -347,11 +347,28 @@ final class VideoIOComponent: IOComponent {
         }
         return false
     }
+    
+    // MARK: - Sample buffer processor
+    var sampleBufferProcessor: SampleBufferProcessor? {
+        didSet {
+            sampleBufferProcessor?.delegate = self
+        }
+    }
 }
 
 extension VideoIOComponent: AVCaptureVideoDataOutputSampleBufferDelegate {
     // MARK: AVCaptureVideoDataOutputSampleBufferDelegate
     func captureOutput(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        if let sampleBufferProcessor = sampleBufferProcessor {
+            sampleBufferProcessor.appendSampleBuffer(sampleBuffer)
+        } else {
+            appendSampleBuffer(sampleBuffer)
+        }
+    }
+}
+
+extension VideoIOComponent: SampleBufferProcessorDelegate {
+    func appendProcessedSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
         appendSampleBuffer(sampleBuffer)
     }
 }
