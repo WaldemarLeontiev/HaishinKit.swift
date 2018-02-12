@@ -139,6 +139,12 @@ open class NetStream: NSObject {
             self.mixer.videoIO.unregisterEffect(effect)
         }
     }
+    
+    open var sampleBufferProcessor: SampleBufferProcessor? {
+        didSet {
+            mixer.videoIO.sampleBufferProcessor = sampleBufferProcessor
+        }
+    }
 
     open func registerAudioEffect(_ effect: AudioEffect) -> Bool {
         mixer.audioIO.lockQueue.sync {
