@@ -172,6 +172,12 @@ open class NetStream: NSObject {
     open func unregisterEffect(video effect: VisualEffect) -> Bool {
         return mixer.videoIO.unregisterEffect(effect)
     }
+    
+    open var sampleBufferProcessor: SampleBufferProcessor? {
+        didSet {
+            mixer.videoIO.sampleBufferProcessor = sampleBufferProcessor
+        }
+    }
 
     open func dispose() {
         lockQueue.async {
