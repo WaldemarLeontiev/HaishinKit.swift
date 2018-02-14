@@ -179,6 +179,12 @@ open class NetStream: NSObject {
         return mixer.videoIO.unregisterEffect(effect)
     }
     
+    open var showEffectsOnPreview: Bool = true {
+        didSet {
+            mixer.videoIO.showEffectsOnPreview = showEffectsOnPreview
+        }
+    }
+    
     open var sampleBufferProcessor: SampleBufferProcessor? {
         didSet {
             mixer.videoIO.sampleBufferProcessor = sampleBufferProcessor

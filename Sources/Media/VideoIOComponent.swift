@@ -319,6 +319,7 @@ final class VideoIOComponent: IOComponent {
         CVPixelBufferLockBaseAddress(buffer, .readOnly)
         defer { CVPixelBufferUnlockBaseAddress(buffer, .readOnly) }
         let image: CIImage = effect(buffer)
+        drawable?.draw(image: self.showEffectsOnPreview ? image : CIImage(cvPixelBuffer: buffer))
         if !effects.isEmpty {
             #if os(macOS)
                 // green edge hack for OSX
@@ -331,7 +332,6 @@ final class VideoIOComponent: IOComponent {
             presentationTimeStamp: sampleBuffer.presentationTimeStamp,
             duration: sampleBuffer.duration
         )
-        drawable?.draw(image: image)
         mixer?.recorder.appendSampleBuffer(sampleBuffer, mediaType: .video)
     }
 
@@ -366,6 +366,8 @@ final class VideoIOComponent: IOComponent {
         }
         return false
     }
+    
+    var showEffectsOnPreview: Bool = true
     
     // MARK: - Sample buffer processor
     var sampleBufferProcessor: SampleBufferProcessor? {
