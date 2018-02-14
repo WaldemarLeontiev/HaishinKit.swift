@@ -403,6 +403,8 @@ final class VideoIOComponent: IOComponent {
         return effects.remove(effect) != nil
     }
     
+    var showEffectsOnPreview: Bool = true
+    
     // MARK: - Sample buffer processor
     var sampleBufferProcessor: SampleBufferProcessor? {
         didSet {
@@ -443,7 +445,7 @@ extension VideoIOComponent {
                 }
                 context?.render(image, to: imageBuffer ?? buffer)
             }
-            renderer?.render(image: image)
+            renderer?.render(image: self.showEffectsOnPreview ? image : CIImage(cvPixelBuffer: buffer))
         }
 
         encoder.encodeImageBuffer(
