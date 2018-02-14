@@ -399,7 +399,7 @@ final class VideoIOComponent: IOComponent {
                 }
                 context?.render(image, to: imageBuffer ?? buffer)
             }
-            drawable?.draw(image: image)
+            drawable?.draw(image: self.showEffectsOnPreview ? image : CIImage(cvPixelBuffer: buffer))
         }
 
         encoder.encodeImageBuffer(
@@ -429,6 +429,8 @@ final class VideoIOComponent: IOComponent {
         effect.ciContext = nil
         return effects.remove(effect) != nil
     }
+    
+    var showEffectsOnPreview: Bool = true
     
     // MARK: - Sample buffer processor
     var sampleBufferProcessor: SampleBufferProcessor? {
