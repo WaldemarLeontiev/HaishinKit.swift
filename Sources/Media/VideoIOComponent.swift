@@ -220,6 +220,20 @@ final class VideoIOComponent: IOComponent {
             }
         }
     }
+    
+    var mirrorVideo: Bool = false {
+        didSet {
+            updateVideoMirroring()
+        }
+    }
+    
+    private func updateVideoMirroring() {
+        output.connections.forEach({
+            if $0.isVideoMirroringSupported {
+                $0.isVideoMirrored = mirrorVideo
+            }
+        })
+    }
 
     #if os(iOS)
     var preferredVideoStabilizationMode: AVCaptureVideoStabilizationMode = .off {
@@ -324,7 +338,7 @@ final class VideoIOComponent: IOComponent {
             connection.preferredVideoStabilizationMode = preferredVideoStabilizationMode
             #endif
         }
-
+        updateVideoMirroring()
         output.setSampleBufferDelegate(self, queue: lockQueue)
 
         fps *= 1

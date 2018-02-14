@@ -111,6 +111,12 @@ open class NetStream: NSObject {
         mixer.videoIO.focusPointOfInterest = focus
         mixer.videoIO.exposurePointOfInterest = exposure
     }
+    
+    open var mirrorVideo: Bool = false {
+        didSet {
+            mixer.videoIO.mirrorVideo = mirrorVideo
+        }
+    }
 #endif
 
     open func appendSampleBuffer(_ sampleBuffer: CMSampleBuffer, withType: AVMediaType, options: [NSObject: AnyObject]? = nil) {
