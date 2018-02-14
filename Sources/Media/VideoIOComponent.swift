@@ -156,6 +156,20 @@ final class VideoIOComponent: IOComponent {
             }
         }
     }
+    
+    var mirrorVideo: Bool = false {
+        didSet {
+            updateVideoMirroring()
+        }
+    }
+    
+    private func updateVideoMirroring() {
+        output.connections.forEach({
+            if $0.isVideoMirroringSupported {
+                $0.isVideoMirrored = mirrorVideo
+            }
+        })
+    }
 
     private var _output: AVCaptureVideoDataOutput?
     var output: AVCaptureVideoDataOutput! {
@@ -249,6 +263,7 @@ final class VideoIOComponent: IOComponent {
         for connection in output.connections where connection.isVideoOrientationSupported {
             connection.videoOrientation = orientation
         }
+        updateVideoMirroring()
         output.setSampleBufferDelegate(self, queue: lockQueue)
 
         fps *= 1
