@@ -64,7 +64,7 @@ final class AACEncoder: NSObject {
     var inClassDescriptions: [AudioClassDescription] = AACEncoder.defaultInClassDescriptions
     var formatDescription: CMFormatDescription? {
         didSet {
-            if (!CMFormatDescriptionEqual(formatDescription, oldValue)) {
+            if !CMFormatDescriptionEqual(formatDescription, oldValue) {
                 delegate?.didSetFormatDescription(audio: formatDescription)
             }
         }
@@ -255,8 +255,8 @@ final class AACEncoder: NSObject {
     }
 }
 
-extension AACEncoder: Runnable {
-    // MARK: Runnable
+extension AACEncoder: Running {
+    // MARK: Running
     func startRunning() {
         lockQueue.async {
             self.running = true
