@@ -41,11 +41,9 @@ final class RTMPTSocket: NSObject, RTMPSocketCompatible {
     private(set) var queueBytesOut: Int64 = 0
     private var timer: Timer? {
         didSet {
-            if let oldValue: Timer = oldValue {
-                oldValue.invalidate()
-            }
+            oldValue?.invalidate()
             if let timer: Timer = timer {
-                RunLoop.main.add(timer, forMode: RunLoopMode.commonModes)
+                RunLoop.main.add(timer, forMode: .commonModes)
             }
         }
     }
@@ -58,7 +56,7 @@ final class RTMPTSocket: NSObject, RTMPSocketCompatible {
     private var request: URLRequest!
     private var c2packet: Data = Data()
     private var handshake: RTMPHandshake = RTMPHandshake()
-    private let outputQueue: DispatchQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.RTMPTSocket.output")
+    private let outputQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.RTMPTSocket.output")
     private var connectionID: String?
     private var isRequesting: Bool = false
     private var outputBuffer: Data = Data()
@@ -79,10 +77,10 @@ final class RTMPTSocket: NSObject, RTMPSocketCompatible {
             "User-Agent": "Shockwave Flash"
         ]
         let scheme: String = securityLevel == .none ? "http" : "https"
-        session = URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue.main)
+        session = URLSession(configuration: config, delegate: self, delegateQueue: .main)
         baseURL = URL(string: "\(scheme): //\(withName): \(port)")!
         doRequest("/fcs/ident2", Data([0x00]), didIdent2)
-        timer = Timer(timeInterval: 0.1, target: self, selector: #selector(RTMPTSocket.on(timer: )), userInfo: nil, repeats: true)
+        timer = Timer(timeInterval: 0.1, target: self, selector: #selector(on(timer:)), userInfo: nil, repeats: true)
     }
 
     @discardableResult
@@ -214,7 +212,7 @@ final class RTMPTSocket: NSObject, RTMPSocketCompatible {
         guard let data: Data = data else {
             return
         }
-        connectionID = String(data: data, encoding: String.Encoding.utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        connectionID = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
         doRequest("/idle/\(connectionID!)/0", Data([0x00]), didIdle0)
         if logger.isEnabledFor(level: .trace) {
             logger.trace("\(data.bytes): \(String(describing: response))")
@@ -273,8 +271,7 @@ final class RTMPTSocket: NSObject, RTMPSocketCompatible {
         return data.count
     }
 
-    private func doRequest(_ pathComponent: String, _
-data: Data, _ completionHandler: @escaping ((Data?, URLResponse?, Error?) -> Void)) {
+    private func doRequest(_ pathComponent: String, _ data: Data, _ completionHandler: @escaping ((Data?, URLResponse?, Error?) -> Void)) {
         isRequesting = true
         lastRequestPathComponent = pathComponent
         lastRequestData = data

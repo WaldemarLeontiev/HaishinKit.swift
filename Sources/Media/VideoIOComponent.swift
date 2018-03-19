@@ -3,7 +3,7 @@ import Foundation
 import AVFoundation
 
 final class VideoIOComponent: IOComponent {
-    let lockQueue: DispatchQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.VideoIOComponent.lock")
+    let lockQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.VideoIOComponent.lock")
     var context: CIContext?
     var drawable: NetStreamDrawable?
     var formatDescription: CMVideoFormatDescription? {
@@ -26,7 +26,7 @@ final class VideoIOComponent: IOComponent {
         didSet {
             guard
                 let device: AVCaptureDevice = (input as? AVCaptureDeviceInput)?.device,
-                let data = DeviceUtil.getActualFPS(fps, device: device) else {
+                let data = device.actualFPS(fps) else {
                 return
             }
 
@@ -111,7 +111,7 @@ final class VideoIOComponent: IOComponent {
             do {
                 try device.lockForConfiguration()
                 device.focusPointOfInterest = point
-                device.focusMode = .autoFocus
+                device.focusMode = .continuousAutoFocus
                 device.unlockForConfiguration()
             } catch let error as NSError {
                 logger.error("while locking device for focusPointOfInterest: \(error)")
@@ -130,7 +130,7 @@ final class VideoIOComponent: IOComponent {
             do {
                 try device.lockForConfiguration()
                 device.exposurePointOfInterest = point
-                device.exposureMode = .autoExpose
+                device.exposureMode = .continuousAutoExposure
                 device.unlockForConfiguration()
             } catch let error as NSError {
                 logger.error("while locking device for exposurePointOfInterest: \(error)")
@@ -348,7 +348,7 @@ final class VideoIOComponent: IOComponent {
         defer {
             objc_sync_exit(effects)
         }
-        if let _: Int = effects.index(of: effect) {
+        if effects.contains(effect) {
             return false
         }
         effects.append(effect)

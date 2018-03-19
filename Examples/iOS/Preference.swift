@@ -1,5 +1,3 @@
-import Foundation
-
 struct Preference {
     static var defaultInstance: Preference = Preference()
 

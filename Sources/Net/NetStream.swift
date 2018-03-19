@@ -15,7 +15,7 @@ protocol NetStreamDrawable: class {
 // MARK: -
 open class NetStream: NSObject {
     public private(set) var mixer: AVMixer = AVMixer()
-    public let lockQueue: DispatchQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.NetStream.lock")
+    public let lockQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.NetStream.lock")
 
     deinit {
         metadata.removeAll()
@@ -57,9 +57,9 @@ open class NetStream: NSObject {
                 return
             }
             if syncOrientation {
-                NotificationCenter.default.addObserver(self, selector: #selector(NetStream.on(uiDeviceOrientationDidChange: )), name: NSNotification.Name.UIDeviceOrientationDidChange, object: nil)
+                NotificationCenter.default.addObserver(self, selector: #selector(on), name: .UIDeviceOrientationDidChange, object: nil)
             } else {
-                NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIDeviceOrientationDidChange, object: nil)
+                NotificationCenter.default.removeObserver(self, name: .UIDeviceOrientationDidChange, object: nil)
             }
         }
     }

@@ -6,8 +6,8 @@ open class NetService: NSObject {
         return nil
     }
 
-    let lockQueue: DispatchQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.NetService.lock")
-    var networkQueue: DispatchQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.NetService.network")
+    let lockQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.NetService.lock")
+    var networkQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.NetService.network")
 
     private(set) var domain: String
     private(set) var name: String
@@ -44,7 +44,7 @@ open class NetService: NSObject {
 
     func willStopRunning() {
         if let runloop: RunLoop = runloop {
-            service.remove(from: runloop, forMode: RunLoopMode.defaultRunLoopMode)
+            service.remove(from: runloop, forMode: .defaultRunLoopMode)
             CFRunLoopStop(runloop.getCFRunLoop())
         }
         service.stop()
@@ -54,15 +54,15 @@ open class NetService: NSObject {
     }
 
     private func initService() {
-        runloop = RunLoop.current
+        runloop = .current
         service = Foundation.NetService(domain: domain, type: type, name: name, port: port)
         service.delegate = self
         service.setTXTRecord(txtData)
-        service.schedule(in: runloop, forMode: RunLoopMode.defaultRunLoopMode)
+        service.schedule(in: runloop, forMode: .defaultRunLoopMode)
         if type.contains("._udp") {
             service.publish()
         } else {
-            service.publish(options: Foundation.NetService.Options.listenForConnections)
+            service.publish(options: .listenForConnections)
         }
         runloop.run()
     }

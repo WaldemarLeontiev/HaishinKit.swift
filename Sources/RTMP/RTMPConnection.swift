@@ -31,7 +31,7 @@ open class Responder: NSObject {
  */
 open class RTMPConnection: EventDispatcher {
     static public let defaultWindowSizeS: Int64 = 250000
-    static public let supportedProtocols: [String] = ["rtmp", "rtmps", "rtmpt", "rtmpts"]
+    static public let supportedProtocols: Set<String> = ["rtmp", "rtmps", "rtmpt", "rtmpts"]
     static public let defaultPort: Int = 1935
     static public let defaultFlashVer: String = "FMLE/3.0 (compatible; FMSc/1.0)"
     static public let defaultChunkSizeS: Int = 1024 * 8
@@ -208,9 +208,7 @@ open class RTMPConnection: EventDispatcher {
 
     private var timer: Timer? {
         didSet {
-            if let oldValue: Timer = oldValue {
-                oldValue.invalidate()
-            }
+            oldValue?.invalidate()
             if let timer: Timer = timer {
                 RunLoop.main.add(timer, forMode: .commonModes)
             }
@@ -226,13 +224,13 @@ open class RTMPConnection: EventDispatcher {
 
     override public init() {
         super.init()
-        addEventListener(Event.RTMP_STATUS, selector: #selector(RTMPConnection.on(status: )))
+        addEventListener(Event.RTMP_STATUS, selector: #selector(on(status:)))
     }
 
     deinit {
         timer = nil
         streams.removeAll()
-        removeEventListener(Event.RTMP_STATUS, selector: #selector(RTMPConnection.on(status: )))
+        removeEventListener(Event.RTMP_STATUS, selector: #selector(on(status:)))
     }
 
     @available(*, unavailable)
@@ -260,12 +258,12 @@ open class RTMPConnection: EventDispatcher {
     }
 
     open func connect(_ command: String, arguments: Any?...) {
-        guard let uri: URL = URL(string: command), let scheme: String = uri.scheme, !connected && RTMPConnection.supportedProtocols.contains(scheme) else {
+        guard let uri = URL(string: command), let scheme: String = uri.scheme, !connected && RTMPConnection.supportedProtocols.contains(scheme) else {
             return
         }
         self.uri = uri
         self.arguments = arguments
-        timer = Timer(timeInterval: 1.0, target: self, selector: #selector(RTMPConnection.on(timer: )), userInfo: nil, repeats: true)
+        timer = Timer(timeInterval: 1.0, target: self, selector: #selector(on(timer:)), userInfo: nil, repeats: true)
         switch scheme {
         case "rtmpt", "rtmpts":
             socket = socket is RTMPTSocket ? socket : RTMPTSocket()
@@ -317,8 +315,8 @@ open class RTMPConnection: EventDispatcher {
             return
         }
 
-        switch code {
-        case Code.connectSuccess.rawValue:
+        switch Code(rawValue: code) {
+        case .connectSuccess?:
             connected = true
             socket.chunkSizeS = chunkSize
             socket.doOutput(chunk: RTMPChunk(
@@ -326,7 +324,7 @@ open class RTMPConnection: EventDispatcher {
                 streamId: RTMPChunk.StreamID.control.rawValue,
                 message: RTMPSetChunkSizeMessage(UInt32(socket.chunkSizeS))
             ), locked: nil)
-        case Code.connectRejected.rawValue:
+        case .connectRejected?:
             guard
                 let uri: URL = uri,
                 let user: String = uri.user,
@@ -354,7 +352,7 @@ open class RTMPConnection: EventDispatcher {
             default:
                 break
             }
-        case Code.connectClosed.rawValue:
+        case .connectClosed?:
             if let description: String = data["description"] as? String {
                 logger.warn(description)
             }

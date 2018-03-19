@@ -1,11 +1,16 @@
 import UIKit
 import CoreImage
-import Foundation
 import AVFoundation
 
 public protocol ScreenCaptureOutputPixelBufferDelegate: class {
     func didSet(size: CGSize)
     func output(pixelBuffer: CVPixelBuffer, withPresentationTime: CMTime)
+}
+
+extension CGRect {
+    init(size: CGSize) {
+        self.init(origin: .zero, size: size)
+    }
 }
 
 // MARK: -
@@ -32,14 +37,14 @@ open class ScreenCaptureSession: NSObject {
     private var viewToCapture: UIView?
     public var afterScreenUpdates: Bool = false
     private var context: CIContext = CIContext(options: [kCIContextUseSoftwareRenderer: NSNumber(value: false)])
-    private let semaphore: DispatchSemaphore = DispatchSemaphore(value: 1)
-    private let lockQueue: DispatchQueue = DispatchQueue(
-        label: "com.haishinkit.HaishinKit.ScreenCaptureSession.lock", qos: DispatchQoS.userInteractive, attributes: []
+    private let semaphore = DispatchSemaphore(value: 1)
+    private let lockQueue = DispatchQueue(
+        label: "com.haishinkit.HaishinKit.ScreenCaptureSession.lock", qos: .userInteractive, attributes: []
     )
     private var colorSpace: CGColorSpace!
     private var displayLink: CADisplayLink!
 
-    private var size: CGSize = CGSize() {
+    private var size: CGSize = .zero {
         didSet {
             guard size != oldValue else {
                 return
@@ -81,7 +86,7 @@ open class ScreenCaptureSession: NSObject {
     }
 
     @objc public func onScreen(_ displayLink: CADisplayLink) {
-        guard semaphore.wait(timeout: DispatchTime.now()) == .success else {
+        guard semaphore.wait(timeout: .now()) == .success else {
             return
         }
 
@@ -104,7 +109,7 @@ open class ScreenCaptureSession: NSObject {
         var pixelBuffer: CVPixelBuffer?
 
         CVPixelBufferPoolCreatePixelBuffer(nil, pixelBufferPool, &pixelBuffer)
-        CVPixelBufferLockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
+        CVPixelBufferLockBaseAddress(pixelBuffer!, [])
         UIGraphicsBeginImageContextWithOptions(size, false, scale)
         let cgctx: CGContext = UIGraphicsGetCurrentContext()!
         DispatchQueue.main.sync {
@@ -129,7 +134,7 @@ open class ScreenCaptureSession: NSObject {
         UIGraphicsEndImageContext()
         context.render(CIImage(cgImage: image.cgImage!), to: pixelBuffer!)
         delegate?.output(pixelBuffer: pixelBuffer!, withPresentationTime: CMTimeMakeWithSeconds(displayLink.timestamp, 1000))
-        CVPixelBufferUnlockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
+        CVPixelBufferUnlockBaseAddress(pixelBuffer!, [])
     }
 }
 
@@ -143,7 +148,7 @@ extension ScreenCaptureSession: Running {
             self.running = true
             self.pixelBufferPool = nil
             self.colorSpace = CGColorSpaceCreateDeviceRGB()
-            self.displayLink = CADisplayLink(target: self, selector: #selector(ScreenCaptureSession.onScreen(_: )))
+            self.displayLink = CADisplayLink(target: self, selector: #selector(onScreen))
             self.displayLink.frameInterval = self.frameInterval
             self.displayLink.add(to: .main, forMode: .commonModes)
         }

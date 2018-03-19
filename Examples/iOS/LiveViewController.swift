@@ -73,7 +73,7 @@ final class LiveViewController: UIViewController {
         rtmpStream.attachCamera(DeviceUtil.device(withPosition: currentPosition)) { error in
             logger.warn(error.description)
         }
-        rtmpStream.addObserver(self, forKeyPath: "currentFPS", options: NSKeyValueObservingOptions.new, context: nil)
+        rtmpStream.addObserver(self, forKeyPath: "currentFPS", options: .new, context: nil)
         lfView?.attachStream(rtmpStream)
     }
 
@@ -124,13 +124,13 @@ final class LiveViewController: UIViewController {
         if publish.isSelected {
             UIApplication.shared.isIdleTimerDisabled = false
             rtmpConnection.close()
-            rtmpConnection.removeEventListener(Event.RTMP_STATUS, selector: #selector(self.rtmpStatusHandler(_:)), observer: self)
-            publish.setTitle("●", for: UIControlState())
+            rtmpConnection.removeEventListener(Event.RTMP_STATUS, selector: #selector(rtmpStatusHandler), observer: self)
+            publish.setTitle("●", for: [])
         } else {
             UIApplication.shared.isIdleTimerDisabled = true
-            rtmpConnection.addEventListener(Event.RTMP_STATUS, selector: #selector(self.rtmpStatusHandler(_:)), observer: self)
+            rtmpConnection.addEventListener(Event.RTMP_STATUS, selector: #selector(rtmpStatusHandler), observer: self)
             rtmpConnection.connect(Preference.defaultInstance.uri!)
-            publish.setTitle("■", for: UIControlState())
+            publish.setTitle("■", for: [])
         }
         publish.isSelected = !publish.isSelected
     }
@@ -173,15 +173,15 @@ final class LiveViewController: UIViewController {
 
     @IBAction func onEffectValueChanged(_ segment: UISegmentedControl) {
         if let currentEffect: VisualEffect = currentEffect {
-            let _: Bool = rtmpStream.unregisterEffect(video: currentEffect)
+            _ = rtmpStream.unregisterEffect(video: currentEffect)
         }
         switch segment.selectedSegmentIndex {
         case 1:
             currentEffect = MonochromeEffect()
-            let _: Bool = rtmpStream.registerEffect(video: currentEffect!)
+            _ = rtmpStream.registerEffect(video: currentEffect!)
         case 2:
             currentEffect = PronamaEffect()
-            let _: Bool = rtmpStream.registerEffect(video: currentEffect!)
+            _ = rtmpStream.registerEffect(video: currentEffect!)
         default:
             break
         }

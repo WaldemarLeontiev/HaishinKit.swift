@@ -40,15 +40,14 @@ class AudioStreamPlayback {
             }
         }
     }
-    let lockQueue: DispatchQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.AudioStreamPlayback.lock")
+    let lockQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.AudioStreamPlayback.lock")
     private var bufferSize: UInt32 = AudioStreamPlayback.defaultBufferSize
     private var queue: AudioQueueRef? = nil {
         didSet {
-            guard let oldValue: AudioQueueRef = oldValue else {
-                return
+            oldValue.map {
+                AudioQueueStop($0, true)
+                AudioQueueDispose($0, true)
             }
-            AudioQueueStop(oldValue, true)
-            AudioQueueDispose(oldValue, true)
         }
     }
     private var inuse: [Bool] = []
@@ -59,10 +58,7 @@ class AudioStreamPlayback {
     private var packetDescriptions: [AudioStreamPacketDescription] = []
     private var fileStreamID: AudioFileStreamID? = nil {
         didSet {
-            guard let oldValue: AudioFileStreamID = oldValue else {
-                return
-            }
-            AudioFileStreamClose(oldValue)
+            _ = oldValue.map { AudioFileStreamClose($0) }
         }
     }
     private var isPacketDescriptionsFull: Bool {
@@ -106,7 +102,7 @@ class AudioStreamPlayback {
                 fileStreamID,
                 UInt32(data.count),
                 bytes,
-                AudioFileStreamParseFlags(rawValue: 0)
+                []
             )
         }
     }
@@ -172,7 +168,7 @@ class AudioStreamPlayback {
     }
 
     func initializeForAudioQueue() {
-        guard let _: AudioStreamBasicDescription = formatDescription, self.queue == nil else {
+        guard formatDescription != nil && self.queue == nil else {
             return
         }
         var queue: AudioQueueRef? = nil
@@ -188,7 +184,7 @@ class AudioStreamPlayback {
                 &queue)
         }
         if let cookie: [UInt8] = getMagicCookieForFileStream() {
-            let _: Bool = setMagicCookieForQueue(cookie)
+            _ = setMagicCookieForQueue(cookie)
         }
         soundTransform.setParameter(queue!)
         for _ in 0..<numberOfBuffers {

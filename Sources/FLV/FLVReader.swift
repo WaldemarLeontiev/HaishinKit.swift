@@ -5,9 +5,7 @@ open class FLVReader {
     static public let header: Data = Data([0x46, 0x4C, 0x56, 1])
     static let headerSize: Int = 11
 
-    public private(set) var url: URL
-    public private(set) var hasAudio: Bool = false
-    public private(set) var hasVideo: Bool = false
+    public let url: URL
     private var currentOffSet: UInt64 = 0
     private var fileHandle: FileHandle?
 
@@ -33,7 +31,7 @@ extension FLVReader: IteratorProtocol {
         guard let fileHandle: FileHandle = fileHandle else {
             return nil
         }
-        var tag: FLVTag! = nil
+        let tag: FLVTag!
         fileHandle.seek(toFileOffset: currentOffSet)
         let data: Data = fileHandle.readData(ofLength: FLVReader.headerSize)
         guard !data.isEmpty else {

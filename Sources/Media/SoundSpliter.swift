@@ -10,7 +10,7 @@ public class SoundSpliter: NSObject {
     static let defaultSampleSize: Int = 1024
     public weak var delegate: SoundSpliterDelegate?
 
-    private let lockQueue: DispatchQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.SoundMixer.lock")
+    private let lockQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.SoundMixer.lock")
     private(set) var status: OSStatus = noErr {
         didSet {
             if status != 0 {
@@ -25,7 +25,7 @@ public class SoundSpliter: NSObject {
     private var presentationTimeStamp: CMTime = kCMTimeZero
 
     private var minimumByteSize: Int {
-        return min(Int.max, sampleData.count)
+        return min(.max, sampleData.count)
     }
 
     public func appendSampleBuffer(_ sampleBuffer: CMSampleBuffer) {

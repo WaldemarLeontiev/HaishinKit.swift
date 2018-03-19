@@ -1,5 +1,3 @@
-import Foundation
-
 public enum FLVTagType: UInt8 {
     case audio = 8
     case video = 9
@@ -7,10 +5,8 @@ public enum FLVTagType: UInt8 {
 
     var streamId: UInt16 {
         switch self {
-        case .audio:
-            return RTMPChunk.StreamID.audio.rawValue
-        case .video:
-            return RTMPChunk.StreamID.video.rawValue
+        case .audio, .video:
+            return UInt16(rawValue)
         case .data:
             return 0
         }
