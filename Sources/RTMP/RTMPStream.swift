@@ -527,6 +527,54 @@ open class RTMPStream: NetStream {
         }
     }
 
+    open func pause() {
+        lockQueue.async {
+            self.paused = true
+            switch self.readyState {
+            case .publish, .publishing:
+                self.mixer.audioIO.encoder.muted = true
+                self.mixer.videoIO.encoder.muted = true
+            default:
+                break
+            }
+        }
+    }
+
+    open func resume() {
+        lockQueue.async {
+            self.paused = false
+            switch self.readyState {
+            case .publish, .publishing:
+                self.mixer.audioIO.encoder.muted = false
+                self.mixer.videoIO.encoder.muted = false
+            default:
+                break
+            }
+        }
+    }
+
+    open func togglePause() {
+        lockQueue.async {
+            switch self.readyState {
+            case .publish, .publishing:
+                self.paused = !self.paused
+                self.mixer.audioIO.encoder.muted = self.paused
+                self.mixer.videoIO.encoder.muted = self.paused
+            default:
+                break
+            }
+        }
+    }
+    
+    open func startRecording() {
+        self.mixer.recorder.fileName = "video"
+        self.mixer.recorder.startRunning()
+    }
+    
+    open func stopRecording() {
+        self.mixer.recorder.stopRunning()
+    }
+
     open func appendFile(_ file: URL, completionHandler: MP4Sampler.Handler? = nil) {
         lockQueue.async {
             if self.sampler == nil {
