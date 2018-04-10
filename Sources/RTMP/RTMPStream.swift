@@ -545,6 +545,15 @@ open class RTMPStream: NetStream {
             }
         }
     }
+    
+    open func startRecording() {
+        self.mixer.recorder.fileName = "video"
+        self.mixer.recorder.startRunning()
+    }
+    
+    open func stopRecording() {
+        self.mixer.recorder.stopRunning()
+    }
 
     open override func appendSampleBuffer(_ sampleBuffer: CMSampleBuffer, withType: CMSampleBufferType, options: [NSObject: AnyObject]? = nil) {
         guard readyState == .publishing else {
