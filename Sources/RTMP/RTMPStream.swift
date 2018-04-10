@@ -545,6 +545,15 @@ open class RTMPStream: NetStream {
             }
         }
     }
+    
+    open func startRecording() {
+        self.mixer.recorder.fileName = "video"
+        self.mixer.recorder.startRunning()
+    }
+    
+    open func stopRecording() {
+        self.mixer.recorder.stopRunning()
+    }
 
     open func appendFile(_ file: URL, completionHandler: MP4Sampler.Handler? = nil) {
         lockQueue.async {
