@@ -9,7 +9,7 @@
 import AVFoundation
 
 public protocol SampleBufferProcessor: class {
-    weak var delegate: SampleBufferProcessorDelegate? {get set}
+    var delegate: SampleBufferProcessorDelegate? {get set}
     func appendSampleBuffer(_ sampleBuffer: CMSampleBuffer)
 }
 
