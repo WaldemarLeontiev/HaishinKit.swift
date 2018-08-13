@@ -4,7 +4,7 @@ import AVFoundation
 /**
  - seealso: https: //en.wikipedia.org/wiki/MPEG_transport_stream#Packet
  */
-struct TSPacket {
+public struct TSPacket {
     static let size: Int = 188
     static let headerSize: Int = 4
     static let defaultSyncByte: UInt8 = 0x47
@@ -183,7 +183,7 @@ struct TSProgramClockReference {
 
 extension TSPacket: CustomStringConvertible {
     // MARK: CustomStringConvertible
-    var description: String {
+    public var description: String {
         return Mirror(reflecting: self).description
     }
 }

@@ -21,7 +21,7 @@ enum PESPTSDTSIndicator: UInt8 {
 }
 
 // MARK: -
-struct PESOptionalHeader {
+public struct PESOptionalHeader {
     static let fixedSectionSize: Int = 3
     static let defaultMarkerBits: UInt8 = 2
 
@@ -122,13 +122,13 @@ extension PESOptionalHeader: DataConvertible {
 
 extension PESOptionalHeader: CustomStringConvertible {
     // MARK: CustomStringConvertible
-    var description: String {
+    public var description: String {
         return Mirror(reflecting: self).description
     }
 }
 
 // MARK: -
-struct PacketizedElementaryStream: PESPacketHeader {
+public struct PacketizedElementaryStream: PESPacketHeader {
     static let untilPacketLengthSize: Int = 6
     static let startCode: Data = Data([0x00, 0x00, 0x01])
 
@@ -142,11 +142,11 @@ struct PacketizedElementaryStream: PESPacketHeader {
         return nil
     }
 
-    var startCode: Data = PacketizedElementaryStream.startCode
-    var streamID: UInt8 = 0
-    var packetLength: UInt16 = 0
-    var optionalPESHeader: PESOptionalHeader?
-    var data = Data()
+    public var startCode: Data = PacketizedElementaryStream.startCode
+    public var streamID: UInt8 = 0
+    public var packetLength: UInt16 = 0
+    public var optionalPESHeader: PESOptionalHeader?
+    public var data = Data()
 
     var payload: Data {
         get {
@@ -298,7 +298,7 @@ struct PacketizedElementaryStream: PESPacketHeader {
 
 extension PacketizedElementaryStream: CustomStringConvertible {
     // MARK: CustomStringConvertible
-    var description: String {
+    public var description: String {
         return Mirror(reflecting: self).description
     }
 }

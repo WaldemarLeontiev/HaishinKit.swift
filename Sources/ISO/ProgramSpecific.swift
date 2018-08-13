@@ -239,7 +239,7 @@ enum ElementaryStreamType: UInt8 {
 }
 
 // MARK: -
-struct ElementaryStreamSpecificData {
+public struct ElementaryStreamSpecificData {
     static let fixedHeaderSize: Int = 5
 
     var streamType: UInt8 = 0
@@ -282,7 +282,7 @@ extension ElementaryStreamSpecificData: DataConvertible {
 
 extension ElementaryStreamSpecificData: CustomStringConvertible {
     // MARK: CustomStringConvertible
-    var description: String {
+    public var description: String {
         return Mirror(reflecting: self).description
     }
 }

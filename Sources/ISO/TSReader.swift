@@ -1,12 +1,12 @@
 import Foundation
 
-protocol TSReaderDelegate: class {
+public protocol TSReaderDelegate: class {
     func didReadPacketizedElementaryStream(_ data: ElementaryStreamSpecificData, PES: PacketizedElementaryStream)
 }
 
 // MARK: -
-class TSReader {
-    weak var delegate: TSReaderDelegate?
+public class TSReader {
+    public weak var delegate: TSReaderDelegate?
 
     private(set) var PAT: ProgramAssociationSpecific? {
         didSet {
@@ -36,12 +36,12 @@ class TSReader {
     private var dictionaryForESSpecData: [UInt16: ElementaryStreamSpecificData] = [: ]
     private var packetizedElementaryStreams: [UInt16: PacketizedElementaryStream] = [: ]
 
-    init(url: URL) throws {
+    public init(url: URL) throws {
         fileHandle = try FileHandle(forReadingFrom: url)
         eof = fileHandle!.seekToEndOfFile()
     }
 
-    func read() {
+    public func read(completion: () -> Void) {
         while let packet: TSPacket = next() {
             numberOfPackets += 1
             if packet.PID == 0x0000 {
@@ -56,6 +56,7 @@ class TSReader {
                 readPacketizedElementaryStream(data, packet: packet)
             }
         }
+        completion()
     }
 
     func readPacketizedElementaryStream(_ data: ElementaryStreamSpecificData, packet: TSPacket) {
@@ -76,7 +77,7 @@ class TSReader {
 
 extension TSReader: IteratorProtocol {
     // MARK: IteratorProtocol
-    func next() -> TSPacket? {
+    public func next() -> TSPacket? {
         guard let fileHandle = fileHandle, UInt64(cursor * TSPacket.size) < eof else {
             return nil
         }
@@ -90,7 +91,7 @@ extension TSReader: IteratorProtocol {
 
 extension TSReader: CustomStringConvertible {
     // MARK: CustomStringConvertible
-    var description: String {
+    public var description: String {
         return Mirror(reflecting: self).description
     }
 }
