@@ -51,7 +51,15 @@ class TSWriter {
     private var rotatedTimestamp: CMTime = kCMTimeZero
     private var currentFileHandle: FileHandle?
     private var continuityCounters: [UInt16: UInt8] = [: ]
-
+    private var isWriteSampleBufferInProgress = false
+    private var sampleBuffersQueue: [SampleBufferToWrite] = []
+    
+    private struct SampleBufferToWrite {
+        let PID: UInt16
+        let streamID: UInt8
+        let sampleBuffer: CMSampleBuffer
+    }
+    
     func getFilePath(_ fileName: String) -> String? {
         return files.first {
             $0.url.absoluteString.contains(fileName)
@@ -59,6 +67,13 @@ class TSWriter {
     }
 
     func writeSampleBuffer(_ PID: UInt16, streamID: UInt8, sampleBuffer: CMSampleBuffer) {
+        guard self.isWriteSampleBufferInProgress == false else {
+            self.sampleBuffersQueue.append(SampleBufferToWrite(PID: PID,
+                                                               streamID: streamID,
+                                                               sampleBuffer: sampleBuffer))
+            return
+        }
+        self.isWriteSampleBufferInProgress = true
         let presentationTimeStamp: CMTime = sampleBuffer.presentationTimeStamp
         if timestamps[PID] == nil {
             timestamps[PID] = presentationTimeStamp
@@ -103,6 +118,11 @@ class TSWriter {
             self.currentFileHandle?.write(bytes)
             logger.warn("\(exception)")
         })
+        self.isWriteSampleBufferInProgress = false
+        if self.sampleBuffersQueue.isEmpty == false {
+            let sampleBuffer = self.sampleBuffersQueue.removeFirst()
+            self.writeSampleBuffer(sampleBuffer.PID, streamID: sampleBuffer.streamID, sampleBuffer: sampleBuffer.sampleBuffer)
+        }
     }
 
     func split(_ PID: UInt16, PES: PacketizedElementaryStream, timestamp: CMTime) -> [TSPacket] {
@@ -243,7 +263,7 @@ extension TSWriter: AudioEncoderDelegate {
     }
 
     func sampleOutput(audio sampleBuffer: CMSampleBuffer) {
-        writeSampleBuffer(TSWriter.defaultAudioPID, streamID: 192, sampleBuffer: sampleBuffer)
+        //        writeSampleBuffer(TSWriter.defaultAudioPID, streamID: 192, sampleBuffer: sampleBuffer)
     }
 }
 
