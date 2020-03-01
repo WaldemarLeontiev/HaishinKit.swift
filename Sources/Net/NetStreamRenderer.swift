@@ -1,5 +1,6 @@
 import AVFoundation
 import Foundation
+import UIKit
 
 #if os(macOS)
 typealias NetStreamRendererView = NSView

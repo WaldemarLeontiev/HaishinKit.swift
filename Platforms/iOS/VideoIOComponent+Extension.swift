@@ -1,6 +1,7 @@
 #if os(iOS)
 
 import AVFoundation
+import UIKit
 
 extension VideoIOComponent {
     var zoomFactor: CGFloat {
